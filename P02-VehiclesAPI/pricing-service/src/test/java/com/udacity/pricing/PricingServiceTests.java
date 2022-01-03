@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -17,20 +15,28 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class PricingServiceApplicationTests {
+public class PricingServiceTests {
 
-	@LocalServerPort
-	private int port;
+    @LocalServerPort
+    private int port;
 
-	@Autowired
-	private TestRestTemplate restTemplate;
+    @Autowired
+    private TestRestTemplate restTemplate;
 
-	@Test
-	public void contextLoads() {
-		ResponseEntity<Price> response =
-				this.restTemplate.getForEntity("http://localhost:" + port + "/prices", Price.class);
+    @Test
+    public void priceServicePositiveTest() {
+        ResponseEntity<Price> response =
+                this.restTemplate.getForEntity("http://localhost:" + port + "/prices/1", Price.class);
 
-		assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
-	}
+        assertThat(response.getBody().getPrice().toString(), equalTo("22877.72"));
+    }
+
+    @Test
+    public void priceServiceNegativeTest() {
+        ResponseEntity<Price> response =
+                this.restTemplate.getForEntity("http://localhost:" + port + "/prices/101", Price.class);
+
+        assertThat(response.getBody(), equalTo(null));
+    }
 
 }
