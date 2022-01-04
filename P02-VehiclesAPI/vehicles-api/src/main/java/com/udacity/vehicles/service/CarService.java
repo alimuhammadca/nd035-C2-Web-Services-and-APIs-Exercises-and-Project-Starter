@@ -1,9 +1,15 @@
 package com.udacity.vehicles.service;
 
+import com.udacity.vehicles.client.maps.MapsClient;
+import com.udacity.vehicles.client.prices.PriceClient;
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.CarRepository;
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Implements the car service create, read, update or delete
@@ -13,13 +19,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class CarService {
 
+    private MapsClient mapsClient;
+    private PriceClient priceClient;
     private final CarRepository repository;
 
-    public CarService(CarRepository repository) {
+    @Autowired
+    public CarService(CarRepository repository, MapsClient mapsClient, PriceClient priceClient) {
         /**
          * TODO: Add the Maps and Pricing Web Clients you create
          *   in `VehiclesApiApplication` as arguments and set them here.
          */
+        this.mapsClient = mapsClient;
+        this.priceClient = priceClient;
         this.repository = repository;
     }
 
@@ -42,7 +53,16 @@ public class CarService {
          *   If it does not exist, throw a CarNotFoundException
          *   Remove the below code as part of your implementation.
          */
-        Car car = new Car();
+        Optional<Car> optionalCar = repository.findById(id);
+        if (optionalCar.isEmpty()) {
+            throw new CarNotFoundException();
+        } else {
+            Car car = optionalCar.get();
+            car.setPrice(priceClient.getPrice(id));
+            car.setLocation(mapsClient.getAddress(car.getLocation()));
+            return car;
+        }
+        //Car car = new Car();
 
         /**
          * TODO: Use the Pricing Web client you create in `VehiclesApiApplication`
@@ -63,7 +83,7 @@ public class CarService {
          */
 
 
-        return car;
+        //return car;
     }
 
     /**
@@ -98,6 +118,12 @@ public class CarService {
         /**
          * TODO: Delete the car from the repository.
          */
+        Optional<Car> optionalCar = repository.findById(id);
+        if (optionalCar.isEmpty()) {
+            throw new CarNotFoundException();
+        } else {
+            repository.delete(optionalCar.get());
+        }
 
 
     }
