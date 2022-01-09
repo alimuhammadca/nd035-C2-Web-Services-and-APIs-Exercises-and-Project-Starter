@@ -23,7 +23,6 @@ public class CarService {
     private PriceClient priceClient;
     private final CarRepository repository;
 
-    @Autowired
     public CarService(CarRepository repository, MapsClient mapsClient, PriceClient priceClient) {
         /**
          * TODO: Add the Maps and Pricing Web Clients you create
@@ -55,7 +54,7 @@ public class CarService {
          */
         Optional<Car> optionalCar = repository.findById(id);
         if (optionalCar.isEmpty()) {
-            throw new CarNotFoundException();
+            throw new CarNotFoundException("ERROR: Car ID: " + id + " Not found");
         } else {
             Car car = optionalCar.get();
             car.setPrice(priceClient.getPrice(id));
@@ -120,7 +119,7 @@ public class CarService {
          */
         Optional<Car> optionalCar = repository.findById(id);
         if (optionalCar.isEmpty()) {
-            throw new CarNotFoundException();
+            throw new CarNotFoundException("ERROR: Car ID: " + id + " Not found");
         } else {
             repository.delete(optionalCar.get());
         }
